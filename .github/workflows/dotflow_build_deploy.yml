@@ -117,4 +117,4 @@ jobs:
             sudo docker images -q | xargs -r docker rmi
             sudo docker system prune -af
             aws ecr get-login-password --region ap-northeast-2 | sudo docker login --username AWS --password-stdin ${{ secrets.ECR_URI }} && sudo docker pull ${{ secrets.ECR_URI }}:${{ github.sha }}
-            sudo docker run --name cozymate-prod-server -d -e SPRING_PROFILE=prod -e TZ=Asia/Seoul -e SERVER=true -p 8080:8080 ${{ secrets.ECR_URI }}:${{ github.sha }}
+            sudo docker run --name dotflow-prod-server -d -e SPRING_PROFILE=prod -e TZ=Asia/Seoul -e SERVER=true -p 8080:8080 ${{ secrets.ECR_URI }}:${{ github.sha }}
