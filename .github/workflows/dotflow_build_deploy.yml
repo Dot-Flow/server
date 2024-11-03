@@ -2,7 +2,7 @@ name: DOTFLOW_SERVER_DEPLOY
 
 on:
   push:
-    branches: [ "main", "release" ]
+    branches: [ "release" ]
 
 jobs:
   ci:
