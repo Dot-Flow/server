@@ -61,7 +61,7 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         if: github.ref == 'refs/heads/release'
         run: |
-          docker build -t dotflow-dev-server .
+          docker build -t dotflow-dev-repo .
 
       ## Main Branch Build
       - name: Build, Tag (Main Branch)
@@ -69,7 +69,7 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         if: github.ref == 'refs/heads/main'
         run: |
-          docker build -t dotflow-prod-server .
+          docker build -t dotflow-prod-repo .
 
       - name: AWS ECR Push
         env:
