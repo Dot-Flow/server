@@ -95,25 +95,21 @@ jobs:
           username: ubuntu
           key: ${{ secrets.RELEASE_SSH_KEY }}
           script: |
-            sudo docker stop $(sudo docker ps -a -q) || true
-            sudo docker rm $(sudo docker ps -a -q) || true
-            sudo docker images -q | xargs -r docker rmi || true
-            sudo docker system prune -af
-            aws ecr get-login-password --region ap-northeast-2 | sudo docker login --username AWS --password-stdin ${{ secrets.ECR_URI }} && sudo docker pull ${{ secrets.ECR_URI }}:${{ github.sha }}
-            sudo docker run --name dotflow-dev-repo -d -e SPRING_PROFILE=dev -e TZ=Asia/Seoul -e SERVER=true -p 8080:8080 ${{ secrets.ECR_URI }}:${{ github.sha }}
+            # Update and install AWS CLI
+            sudo apt update -y
+            sudo apt install -y awscli
 
-      # Deploy to EC2 (Main Branch)
-      - name: Deploy to EC2 (Main Branch)
-        if: github.ref == 'refs/heads/main'
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.MAIN_EC2_HOST }}
-          username: ubuntu
-          key: ${{ secrets.MAIN_SSH_KEY }}
-          script: |
-            sudo docker stop $(sudo docker ps -a -q) | true
-            sudo docker rm $(sudo docker ps -a -q) | true
-            sudo docker images -q | xargs -r docker rmi
+            # Stop and remove running containers if any exist
+            sudo docker ps -q | xargs -r sudo docker stop
+            sudo docker ps -aq | xargs -r sudo docker rm
+  
+            # Remove unused Docker images
+            sudo docker images -q | xargs -r sudo docker rmi
             sudo docker system prune -af
-            aws ecr get-login-password --region ap-northeast-2 | sudo docker login --username AWS --password-stdin ${{ secrets.ECR_URI }} && sudo docker pull ${{ secrets.ECR_URI }}:${{ github.sha }}
-            sudo docker run --name dotflow-prod-repo -d -e SPRING_PROFILE=prod -e TZ=Asia/Seoul -e SERVER=true -p 8080:8080 ${{ secrets.ECR_URI }}:${{ github.sha }}
+  
+            # Login to ECR
+            aws ecr get-login-password --region ap-northeast-2 | sudo docker login --username AWS --password-stdin ${{ secrets.ECR_URI }}
+  
+            # Pull the Docker image and run the container
+            sudo docker pull ${{ secrets.ECR_URI }}:${{ github.sha }}
+            sudo docker run --name dotflow-dev-repo -d -e SPRING_PROFILE=dev -e TZ=Asia/Seoul -e SERVER=true -p 8080:8080 ${{ secrets.ECR_URI }}:${{ github.sha }}
