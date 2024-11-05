@@ -24,7 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 @RequiredArgsConstructor
-@PropertySource("classpath:config/application.yml")
+@PropertySource("classpath:application.yml")
 @Service
 public class S3CommandService {
 

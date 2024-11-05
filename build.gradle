@@ -54,9 +54,11 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
+
 processResources.dependsOn('copyGitSubmodule')
+
 tasks.register('copyGitSubmodule', Copy) {
-    from './ '
+    from './server-submodule'
     include '*.yml'
     into 'src/main/resources'
 }

@@ -36,5 +36,7 @@ out/
 ### VS Code ###
 .vscode/
 
-/server-submodule
-src/main/resources/config/
+server-submodule
+
+src/test/resources/application.yml
+src/main/resources/application.yml
