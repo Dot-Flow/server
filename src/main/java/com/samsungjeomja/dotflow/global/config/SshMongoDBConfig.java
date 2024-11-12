@@ -68,12 +68,7 @@ public class SshMongoDBConfig {
             log.info("mongo connection through SSH: host={}, port={}", host, port);
 
 
-            MongoClient mongoClient = MongoClients.create(mongoClientSettings);
-
-            MongoDatabase database = mongoClient.getDatabase(databaseName);  // test 데이터베이스 접근
-
-
-            return mongoClient;
+            return MongoClients.create(mongoClientSettings);
         } catch (Exception e) {
             log.error("Failed to create MongoClient: {}", e.getMessage(), e);
             throw e; // 예외를 던져서 초기화가 실패하도록 함

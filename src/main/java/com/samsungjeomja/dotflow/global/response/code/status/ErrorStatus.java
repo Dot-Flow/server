@@ -17,6 +17,8 @@ public enum ErrorStatus implements BaseErrorCode {
     _UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "COMMON401", "인증이 필요합니다."),
     _FORBIDDEN(HttpStatus.FORBIDDEN, "COMMON403", "금지된 요청입니다."),
 
+    _JSON_MAPPING_FAIL(HttpStatus.BAD_REQUEST, "JSON404","Json 매핑 실패"),
+
     // S3 관련
     _FILE_UPLOAD_ERROR(HttpStatus.BAD_REQUEST, "FILE_001", "파일 업로드에 실패했습니다."),
     _FILE_DELETE_ERROR(HttpStatus.BAD_REQUEST, "FILE_002", "파일 삭제에 실패했습니다."),
@@ -25,6 +27,7 @@ public enum ErrorStatus implements BaseErrorCode {
     ;
 
     private final HttpStatus httpStatus;
+
     private final String code;
     private final String message;
 
