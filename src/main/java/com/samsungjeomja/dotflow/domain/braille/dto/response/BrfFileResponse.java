@@ -5,6 +5,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Builder
 public record BrfFileResponse(
+        String summary,
         byte[] brfFile
 ) {
 }

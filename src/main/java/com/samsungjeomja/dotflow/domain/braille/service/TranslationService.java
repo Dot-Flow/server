@@ -1,11 +1,11 @@
 package com.samsungjeomja.dotflow.domain.braille.service;
 
-import com.samsungjeomja.dotflow.domain.braille.dto.request.FromUnicodeToTextRequest;
-import com.samsungjeomja.dotflow.domain.braille.dto.response.TextFileResponse;
-import com.samsungjeomja.dotflow.domain.braille.dto.response.TextResponse;
+import com.samsungjeomja.dotflow.domain.braille.dto.request.UnicodeRequest;
+import com.samsungjeomja.dotflow.domain.braille.dto.response.StringResponse;
 import com.samsungjeomja.dotflow.domain.braille.repository.BrailleImageRepository;
 import com.samsungjeomja.dotflow.domain.braille.utils.FileConverter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,28 +22,39 @@ import org.springframework.web.multipart.MultipartFile;
 @Slf4j
 public class TranslationService {
     private final BrailleImageRepository brailleImageRepository;
+
+    private final GptService gptService;
     private static String url = "";
 
-    public TextResponse translateFromUnicodeToText(FromUnicodeToTextRequest request) {
-        return TextResponse.builder()
+    private static final long MAX_FILE_SIZE = 1024 * 1024; // 1MB
+
+    public StringResponse translateFromUnicodeToText(UnicodeRequest request) {
+        return StringResponse.builder()
                 .str("hello world")
                 .build();
 
     }
 
-    public TextResponse translateFromBrfToText(MultipartFile brfFile) throws IOException {
+    public StringResponse translateFromBrfToText(MultipartFile brfFile) throws IOException {
         String[] str = FileConverter.toUnicodeFromBrf(brfFile);
-        FromUnicodeToTextRequest request =
-                FromUnicodeToTextRequest.builder().unicodeArray(List.of(str)).build();
 
-        String response = sendRequest(request).getBody();
+        UnicodeRequest request =
+                UnicodeRequest.builder().unicodeArray(List.of(str)).build();
+
+//        String response = sendRequest(request).getBody();
 
 
-        return TextResponse.builder()
+        return StringResponse.builder()
                 .str("hello world")
                 .build();
     }
 
+    private String summarizeFileContent(MultipartFile brfFile) throws IOException {
+        String content = new String(brfFile.getBytes(), StandardCharsets.UTF_8);
+
+        return gptService.getGptResponse(content);
+
+    }
 
     public <T> ResponseEntity<String> sendRequest(T request) {
         // RestTemplate 인스턴스 생성

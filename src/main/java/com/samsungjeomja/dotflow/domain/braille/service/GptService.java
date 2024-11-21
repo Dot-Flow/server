@@ -1,5 +1,6 @@
 package com.samsungjeomja.dotflow.domain.braille.service;
 
+import com.samsungjeomja.dotflow.domain.braille.utils.FileConverter;
 import com.samsungjeomja.dotflow.global.response.code.status.ErrorStatus;
 import com.samsungjeomja.dotflow.global.response.exception.GeneralException;
 
@@ -21,6 +22,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @Slf4j
@@ -32,11 +34,11 @@ public class GptService {
     @Value("${api.open_ai.url}")
     private String apiUrl;
 
-    public byte[] getGptSummary(String context) throws IOException {
+    public byte[] getGptSummary(MultipartFile context) throws IOException {
         String prompt = "3줄로 요약해줘.";
 
         // GPT 응답 받기
-        String response = getGptResponse(prompt + context);  // GPT 응답 가져오기
+        String response = getGptResponse(prompt + FileConverter.convertFileToString(context));  // GPT 응답 가져오기
 
         // .txt 파일 생성 및 저장
         String fileName = "translated_summary.txt";
