@@ -17,7 +17,7 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
-@EnableMongoRepositories(basePackages = "com.samsungjeomja.dotflow.domain")
+@EnableMongoRepositories(basePackages = "com.samsungjeomja.dotflow")
 public class SshMongoDBConfig {
 
     private final SshTunnelConfig initializer;
@@ -52,7 +52,7 @@ public class SshMongoDBConfig {
 
         try {
             ConnectionString connectionString = new ConnectionString(String.format(
-                    "mongodb://%s:%s@%s:%s/%s?retryWrites=false",
+                    "mongodb://%s:%s@%s:%s/%s?readPreference=secondaryPreferred&retryWrites=false",
                     mongoUser,
                     mongoPassword,
                     host,
