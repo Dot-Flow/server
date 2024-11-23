@@ -95,9 +95,15 @@ jobs:
           username: ubuntu
           key: ${{ secrets.RELEASE_SSH_KEY }}
           script: |
-            sudo docker stop $(sudo docker ps -a -q) || true
-            sudo docker rm $(sudo docker ps -a -q) || true
+            # Stop and remove all containers except MongoDB
+            sudo docker ps -a -q --filter "name!=mongoDB" | xargs -r sudo docker stop || true
+            sudo docker ps -a -q --filter "name!=mongoDB" | xargs -r sudo docker rm || true
             sudo docker images -q | xargs -r docker rmi || true
             sudo docker system prune -af
-            aws ecr get-login-password --region ap-northeast-2 | sudo docker login --username AWS --password-stdin ${{ secrets.ECR_URI }} && sudo docker pull ${{ secrets.ECR_URI }}:${{ github.sha }}
+  
+            # Docker login and pull new image from ECR
+            aws ecr get-login-password --region ap-northeast-2 | sudo docker login --username AWS --password-stdin ${{ secrets.ECR_URI }}
+            sudo docker pull ${{ secrets.ECR_URI }}:${{ github.sha }}
+  
+            # Run the new container
             sudo docker run --name dotflow-dev-repo -d -e SPRING_PROFILE=dev -e TZ=Asia/Seoul -e SERVER=true -p 8080:8080 ${{ secrets.ECR_URI }}:${{ github.sha }}
