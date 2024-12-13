@@ -1,4 +1,4 @@
-package com.samsungjeomja.dotflow.braille.dto.request;
+package com.samsungjeomja.dotflow.braille.dto.request.to_server;
 
 import org.springframework.web.multipart.MultipartFile;
 

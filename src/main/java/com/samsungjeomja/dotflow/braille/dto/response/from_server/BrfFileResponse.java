@@ -1,4 +1,4 @@
-package com.samsungjeomja.dotflow.braille.dto.response;
+package com.samsungjeomja.dotflow.braille.dto.response.from_server;
 
 import java.util.List;
 import lombok.Builder;

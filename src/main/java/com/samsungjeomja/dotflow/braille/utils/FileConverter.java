@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.mock.web.MockMultipartFile;
@@ -16,18 +17,20 @@ import org.springframework.web.multipart.MultipartFile;
 public class FileConverter {
 
     /**
-     * src : brf
-     * dst : unicode
+     * src : brf dst : unicode
      */
     public static String[] toUnicodeFromBrf(MultipartFile brfFile) throws IOException {
         List<String> unicodeArrayList = new ArrayList<>();
 
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(brfFile.getInputStream(), StandardCharsets.UTF_8))) {
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(brfFile.getInputStream(), StandardCharsets.UTF_8))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 StringBuilder unicodeArray = new StringBuilder();
-                for (char ch : line.toCharArray()) {
-                    unicodeArray.append(BrailleMappingTable.getBrailleUnicode(ch)).append(" ");
+                for (char ch : line.toUpperCase().toCharArray()) {
+                    String unicode = BrailleMappingTable.getBrailleUnicode(ch);
+
+                    unicodeArray.append(unicode).append(" ");
                 }
                 unicodeArrayList.add(unicodeArray.toString());
             }
@@ -37,11 +40,11 @@ public class FileConverter {
     }
 
     /**
-     * src : unicode
-     * dst : brf
+     * src : unicode dst : brf
      */
     public static byte[] toBrfFromUnicode(String[] unicodeArray) throws IOException {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        boolean apoFlag = true;
 
         for (String line : unicodeArray) {
             StringBuilder brfLine = new StringBuilder();
@@ -54,11 +57,21 @@ public class FileConverter {
 
                 int asciiCode = BrailleMappingTable.getAscii(unicode); // 유니코드에서 ASCII 코드 가져오기
                 if (asciiCode != -1) { // 유효한 매핑인 경우
+                    if (asciiCode == -2) { // '
+                        if (apoFlag) {
+                            asciiCode = BrailleMappingTable.getAscii("2820");
+                        } else {
+                            asciiCode = BrailleMappingTable.getAscii("2804");
+                        }
+                        apoFlag = !apoFlag;
+                    }
+
                     brfLine.append((char) (asciiCode)); // ASCII 코드로 변환 후 char로 추가
-                } else {
-                    log.error("매핑되지 않은 유니코드: {}", unicode); // 디버깅 정보 추가
-                    throw new IOException("매핑되지 않은 유니코드: " + unicode);
                 }
+//                else {
+//                    log.error("매핑되지 않은 유니코드: {}", unicode); // 디버깅 정보 추가
+//                    throw new IOException("매핑되지 않은 유니코드: " + unicode);
+//                }
             }
 
             // 한 줄을 바이트로 변환해서 출력 스트림에 추가 (행 끝에 줄바꿈 추가)
@@ -70,9 +83,7 @@ public class FileConverter {
     }
 
     /**
-    /**
-     * src : file path
-     * dst : brf
+     * /** src : file path dst : brf
      */
     public static byte[] convertResourceToByteArray(String resourcePath) throws IOException {
         try (InputStream inputStream = FileConverter.class.getClassLoader().getResourceAsStream(resourcePath);
@@ -96,7 +107,7 @@ public class FileConverter {
      * src : text file
      * dst : string
      */
-    public static String convertFileToString(MultipartFile textFile){
+    public static String convertFileToString(MultipartFile textFile) {
         StringBuilder fileContent = new StringBuilder();
 
         try (BufferedReader reader = new BufferedReader(
@@ -114,8 +125,7 @@ public class FileConverter {
     }
 
     /**
-     * src : string
-     * dst : text file
+     * src : string dst : text file
      */
     public static byte[] convertStringToFile(String content, String fileName) throws IOException {
         // String을 바이트 배열로 변환
@@ -137,4 +147,80 @@ public class FileConverter {
         // MockMultipartFile을 사용하여 byte[]를 MultipartFile로 변환
         return new MockMultipartFile("test-file", "test-file", "application/octet-stream", file);
     }
+
+    /**
+     * 줄바꿈 단위로 String을 분리하여 List<String>으로 변환하는 메소드
+     *
+     * @param input 입력 문자열
+     * @return 줄바꿈 기준으로 분리된 문자열의 List
+     */
+    public static List<String> splitByNewLine(String input) {
+
+
+        return Arrays.asList(input.split("\\n"));
+    }
+
+    public static String joinWithNewLine(List<String> inputList) {
+        if (inputList == null || inputList.isEmpty()) {
+            return ""; // 빈 문자열 반환
+        }
+
+        return String.join("\n", inputList);
+    }
+
+
+    // 점자 유니코드 -> 유니코드 값 자체
+    public static String[] extractUnicodeArray(List<String> brlTexts) {
+        List<String> unicodeList = new ArrayList<>();
+
+        for (String text : brlTexts) {
+            String sanitizedText = text.replace("\"", "");
+
+            for (char c : sanitizedText.toCharArray()) {
+                System.out.print(c + " ");
+                unicodeList.add(String.format("%04X", (int) c));
+            }
+            log.info(String.valueOf(unicodeList));
+        }
+
+        // 리스트를 배열로 변환
+        return unicodeList.toArray(new String[0]);
+    }
+
+    public static String[] convertUnicodeToBrl(List<String> unicodeValues) {
+        // 결과를 저장할 리스트
+        List<String> brlLines = new ArrayList<>();
+
+        for (String unicodeValue : unicodeValues) {
+            StringBuilder currentLine = new StringBuilder();
+
+            // 공백으로 구분된 유니코드 값을 분리
+            String[] unicodeArray = unicodeValue.split("\\s+");
+
+            for (String code : unicodeArray) {
+                // 빈 문자열 필터링
+                if (code.isEmpty()) {
+                    continue;
+                }
+
+                try {
+                    // 16진수 유니코드 값을 문자로 변환
+                    char brailleChar = (char) Integer.parseInt(code, 16);
+
+                    // 변환된 문자 추가
+                    currentLine.append(brailleChar);
+                } catch (NumberFormatException e) {
+                    System.err.println("Invalid Unicode value: " + code);
+                }
+            }
+
+            // 현재의 모든 문자들을 한 줄로 묶어서 결과에 추가
+            brlLines.add(currentLine.toString());
+        }
+
+        // 리스트를 배열로 변환하여 반환
+        return brlLines.toArray(new String[0]);
+    }
+
+
 }

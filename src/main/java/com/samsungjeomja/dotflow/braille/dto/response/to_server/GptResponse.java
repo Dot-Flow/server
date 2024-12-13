@@ -1,4 +1,4 @@
-package com.samsungjeomja.dotflow.braille.dto.response;
+package com.samsungjeomja.dotflow.braille.dto.response.to_server;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;

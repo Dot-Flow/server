@@ -1,4 +1,4 @@
-package com.samsungjeomja.dotflow.braille.service;
+package com.samsungjeomja.dotflow.braille.repository.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;

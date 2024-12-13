@@ -1,10 +1,10 @@
 package com.samsungjeomja.dotflow.braille.controller;
 
-import com.samsungjeomja.dotflow.braille.dto.response.BrfFileResponse;
-import com.samsungjeomja.dotflow.braille.service.TranslationService;
-import com.samsungjeomja.dotflow.braille.dto.request.UnicodeRequest;
-import com.samsungjeomja.dotflow.braille.dto.response.TextFileResponse;
-import com.samsungjeomja.dotflow.braille.service.GptService;
+import com.samsungjeomja.dotflow.braille.dto.response.from_server.BrfFileResponse;
+import com.samsungjeomja.dotflow.braille.repository.service.TranslationService;
+import com.samsungjeomja.dotflow.braille.dto.request.to_server.UnicodeRequest;
+import com.samsungjeomja.dotflow.braille.dto.response.from_server.TextFileResponse;
+import com.samsungjeomja.dotflow.braille.repository.service.GptService;
 
 
 import io.swagger.v3.oas.annotations.Parameter;
@@ -58,10 +58,10 @@ public class TranslationController {
     )
     public ResponseEntity<TextFileResponse> translateToTextFromImage(
             @Parameter(description = "image 파일을 업로드하세요.", required = true)
-            @RequestParam
-            String imageUrl) throws IOException {
+            @RequestBody
+            MultipartFile image) throws IOException {
 
-        TextFileResponse resultDto = translationService.translateFromImageToText(imageUrl);
+        TextFileResponse resultDto = translationService.translateFromImageToText(image);
         return ResponseEntity.ok(resultDto);
 
     }
@@ -88,6 +88,7 @@ public class TranslationController {
             value = "/to-text/gpt-test",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
     )
+    @Deprecated
     public ResponseEntity<byte[]> gptTest(
             @Parameter(description = "Text 파일을 업로드하세요.", required = true)
             @RequestPart(value = "file")
