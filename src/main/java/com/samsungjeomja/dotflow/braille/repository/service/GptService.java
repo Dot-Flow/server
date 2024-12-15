@@ -153,14 +153,30 @@ public class GptService {
         List<String> result = new ArrayList<>();
         String[] lines = inputString.split("\n");
         StringBuilder chunk = new StringBuilder();
+        int count = 0;
 
-        for (int i = 0; i < lines.length; i++) {
-            chunk.append(lines[i]).append("\n");
-            if ((i + 1) % 60 == 0 || i == lines.length - 1) {
+        for (String line : lines) {
+            if (line.trim().isEmpty()) {
+                continue; // 빈 줄은 무시
+            }
+
+            chunk.append(line).append("\n");
+            count++;
+
+            // 60줄마다 결과 리스트에 추가
+            if (count == 60) {
                 result.add(chunk.toString().trim());
-                chunk.setLength(0);
+                chunk.setLength(0); // StringBuilder 초기화
+                count = 0; // 줄 카운터 초기화
             }
         }
+
+        // 마지막 남은 내용 추가
+        if (chunk.length() > 0) {
+            result.add(chunk.toString().trim());
+        }
+
         return result;
     }
+
 }
