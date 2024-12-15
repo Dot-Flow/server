@@ -5,6 +5,6 @@ import lombok.Builder;
 
 @Builder
 public record BrlResponse(
-        List<String> text
+        String text
 ) {
 }

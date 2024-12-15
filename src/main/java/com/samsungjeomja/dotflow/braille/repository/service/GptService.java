@@ -43,14 +43,18 @@ public class GptService {
 
         StringBuilder stringBuilder = new StringBuilder();
         for (String str : splitSentences) {
+            if (str.isEmpty() || str.isBlank()) {
+                continue;
+            }
             List<Message> messages = Arrays.asList(new Message("system",
                             "You are a helpful assistant that corrects contextual errors in sentences. "
                                     + "Exclude special characters that are not important to the content. "
                                     + "Always respond with only the corrected sentence, without any additional explanation. "
+                                    + "Never include my request message."
                                     + "But there must be no part of the content omitted."),
-                    new Message("user", "다음 내용을보고 문맥 오류를 수정하고, 개행문자를 포함해서 자연스럽게 내용을 구성해서 수정된 문장만 출력해줘. "
-                            + "다만 전체적인 내용이 빠져선 안돼. 나의 부탁이 포함되면 안돼."
-                            + "'" + str + "'")
+                    new Message("user", "다음 [] 안에 내용을보고 문맥 오류를 수정하고, 자연스럽게 내용을 구성해서 수정된 문장만 출력해줘. "
+                            + "[]안에 내용이 아니면 포함되면 안돼. 전체적인 내용이 빠져선 안돼."
+                            + "[" + str + "]")
 
             );
             stringBuilder.append(getGptResponse(messages)).append('\n');
@@ -87,6 +91,9 @@ public class GptService {
     }
 
     public String makeSummary(String content) {
+        if (content.isEmpty() || content.isBlank()) {
+            return content;
+        }
         List<Message> messages = Arrays.asList(new Message("system",
                         "You are a helpful assistant to summarize in sentences. "
                                 + "Always respond with only the summarized sentence, without any additional explanation."),
@@ -141,6 +148,7 @@ public class GptService {
         // GPT 응답 처리
         return content;
     }
+
     public List<String> splitByLines(String inputString) {
         List<String> result = new ArrayList<>();
         String[] lines = inputString.split("\n");

@@ -33,8 +33,6 @@ public class TranslationService {
 
     private final OcrService ocrService;
 
-    private static final long MAX_FILE_SIZE = 1024 * 1024; // 1MB
-
     public TextFileResponse translateFromUnicodeToText(UnicodeRequest request) throws IOException {
         String[] brlArray = FileConverter.convertUnicodeToBrl(request.unicodeArray());
 
@@ -91,11 +89,11 @@ public class TranslationService {
     }
 
     public BrfFileResponse translateFromTextToBrf(String request) throws IOException {
-
         BrlResponse brlResponse = apiService.sendTextTranslateRequest(TextTranslationRequest.builder()
                 .text(FileConverter.splitByNewLine(request))
                 .build());
-        String[] unicodeArray = FileConverter.extractUnicodeArray(brlResponse.text());
+        List<String> splitUnicode = FileConverter.splitByNewLine(brlResponse.text());
+        String[] unicodeArray = FileConverter.extractUnicodeArray(splitUnicode);
 
         System.out.println(Arrays.toString(unicodeArray));
         byte[] brfFile = FileConverter.toBrfFromUnicode(unicodeArray);
