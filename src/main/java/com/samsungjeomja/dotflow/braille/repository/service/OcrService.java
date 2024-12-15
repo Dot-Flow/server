@@ -49,8 +49,6 @@ public class OcrService {
         ResponseEntity<OcrResponse> response = restTemplate.postForEntity(OCR_URL + "/ocr", requestEntity,
                 OcrResponse.class);
 
-        return Objects.requireNonNull(response.getBody()).brl().stream()
-                .map(innerList -> String.join("", innerList))
-                .collect(Collectors.toList());
+        return Objects.requireNonNull(response.getBody()).brl();
     }
 }
