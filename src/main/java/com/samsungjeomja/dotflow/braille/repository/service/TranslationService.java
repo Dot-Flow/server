@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +38,7 @@ public class TranslationService {
         String[] brlArray = FileConverter.convertUnicodeToBrl(request.unicodeArray());
 
         for (String s : brlArray) {
-            System.out.print(s);
+            System.out.println(s);
         }
 
         TextResponse response = apiService.sendBrlTranslateRequest(BrlTranslationRequest.builder()
@@ -56,7 +57,6 @@ public class TranslationService {
 
         // 파일 저장
         Files.write(filePath, textFile);
-
 
         return TextFileResponse.builder()
                 .summary(summary)
@@ -82,10 +82,22 @@ public class TranslationService {
     public TextFileResponse translateFromImageToText(MultipartFile image) throws IOException {
 
         List<String> brlList = ocrService.sendBrlImageTranslateRequest(image);
-        String[] unicodeArray = FileConverter.extractUnicodeArray(brlList);
 
-        return translateFromUnicodeToText(
-                UnicodeRequest.builder().unicodeArray(Arrays.stream(unicodeArray).toList()).build());
+        List<String> unicodeList = new ArrayList<>();
+
+        for (String uni : brlList) {
+            StringBuilder unicodes = new StringBuilder();
+            for (char c : uni.toCharArray()) { // 각 문자를 순회
+                unicodes.append(String.format("%04X", (int) c)).append(" "); // 유니코드 값을 추가
+            }
+//            log.info("is there any problem? :{} ", unicodes);
+            unicodeList.add(unicodes.toString().trim()); // 완성된 문자열을 리스트에 추가
+        }
+
+        UnicodeRequest request =
+                UnicodeRequest.builder().unicodeArray(unicodeList).build();
+
+        return translateFromUnicodeToText(request);
     }
 
     public BrfFileResponse translateFromTextToBrf(String request) throws IOException {
