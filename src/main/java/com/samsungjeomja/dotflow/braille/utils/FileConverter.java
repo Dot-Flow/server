@@ -48,7 +48,7 @@ public class FileConverter {
 
         for (String line : unicodeArray) {
             StringBuilder brfLine = new StringBuilder();
-            String[] unicodeChars = line.trim().split("\\s+"); // 유니코드 값 공백 기준으로 분리
+            String[] unicodeChars = line.trim().split(" "); // 유니코드 값 공백 기준으로 분리
 
             for (String unicode : unicodeChars) {
                 if (unicode.isEmpty()) { // 빈 문자열 건너뛰기
@@ -57,7 +57,7 @@ public class FileConverter {
 
                 int asciiCode = BrailleMappingTable.getAscii(unicode); // 유니코드에서 ASCII 코드 가져오기
                 if (asciiCode != -1) { // 유효한 매핑인 경우
-                    if (asciiCode == -2) { // '
+                    if (asciiCode == -2) { // 특수 처리 (예: 아포스트로피)
                         if (apoFlag) {
                             asciiCode = BrailleMappingTable.getAscii("2820");
                         } else {
@@ -66,21 +66,17 @@ public class FileConverter {
                         apoFlag = !apoFlag;
                     }
 
-                    brfLine.append((char) (asciiCode)); // ASCII 코드로 변환 후 char로 추가
+                    brfLine.append((char) asciiCode); // ASCII 코드로 변환 후 char로 추가
                 }
-//                else {
-//                    log.error("매핑되지 않은 유니코드: {}", unicode); // 디버깅 정보 추가
-//                    throw new IOException("매핑되지 않은 유니코드: " + unicode);
-//                }
             }
 
-            // 한 줄을 바이트로 변환해서 출력 스트림에 추가 (행 끝에 줄바꿈 추가)
+            // 개행 없이 이어서 바이트 추가
             byteArrayOutputStream.write(brfLine.toString().getBytes(StandardCharsets.UTF_8));
-            byteArrayOutputStream.write(System.lineSeparator().getBytes(StandardCharsets.UTF_8));
         }
 
         return byteArrayOutputStream.toByteArray(); // BRF 파일의 byte[] 반환
     }
+
 
     /**
      * /** src : file path dst : brf
